@@ -47,7 +47,9 @@ exports.default = function (babel) {
 
             if (scope.path !== replacement) {
               //not a block
-              node ? path.replaceWith(node) : path.remove();
+              if (node) {
+                  path.replaceWith(node);
+              }
             } else if (Object.getOwnPropertyNames(scope.bindings).length != 0) {
               node ? path.replaceWith(node) : path.remove();
             } else {
