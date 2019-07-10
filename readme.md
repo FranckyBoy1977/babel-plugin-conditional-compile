@@ -28,7 +28,7 @@ foo=2;
 ## Installation
 
 ```sh
-$ npm install babel-plugin-conditional-compile --save-dev
+$ npm install babel-plugin-conditional-compile-v2 --save-dev
 ```
 
 ## Usage
