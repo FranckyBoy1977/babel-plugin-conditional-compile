@@ -11,6 +11,8 @@ exports.default = function (babel) {
       mapKeys = [],
       mapFuncs = void 0,
       dropDebugger = void 0;
+  var mustProcessCondition = false;
+
   return {
     visitor: {
       Program: function Program(path, PluginPass) {
@@ -28,6 +30,7 @@ exports.default = function (babel) {
         var i = mapKeys.indexOf(path.node.name);
         if (i !== -1) {
           path.replaceWith(mapFuncs[i]());
+          mustProcessCondition = true;
         }
       },
       DebuggerStatement: function DebuggerStatement(path) {
@@ -47,9 +50,10 @@ exports.default = function (babel) {
 
             if (scope.path !== replacement) {
               //not a block
-              if (node) {
-                  path.replaceWith(node);
+              if (mustProcessCondition) {
+                  node ? path.replaceWith(node) : path.remove();
               }
+              mustProcessCondition = false;
             } else if (Object.getOwnPropertyNames(scope.bindings).length != 0) {
               node ? path.replaceWith(node) : path.remove();
             } else {
