@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-conditional-compile-v2",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "babel plugin for conditional compile",
   "main": "dist/index.js",
   "scripts": {
