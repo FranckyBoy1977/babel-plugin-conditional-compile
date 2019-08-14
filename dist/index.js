@@ -11,7 +11,6 @@ exports.default = function (babel) {
       mapKeys = [],
       mapFuncs = void 0,
       dropDebugger = void 0;
-  var mustProcessCondition = false;
 
   return {
     visitor: {
@@ -30,7 +29,7 @@ exports.default = function (babel) {
         var i = mapKeys.indexOf(path.node.name);
         if (i !== -1) {
           path.replaceWith(mapFuncs[i]());
-          mustProcessCondition = true;
+          path.node.isPreProcessor=true;
         }
       },
       DebuggerStatement: function DebuggerStatement(path) {
@@ -38,39 +37,26 @@ exports.default = function (babel) {
           path.remove();
         }
       },
-
       Conditional: {
         exit: function exit(path) {
           var res = _evaluate.evaluate.call(path.get('test'));
-
           if (res.confident) {
             var replacement = path.get(res.value ? 'consequent' : 'alternate');
             var node = replacement.node;
             var scope = replacement.scope;
+            var leftNodeTest = replacement.parent.test.left;
 
-            if (scope.path !== replacement) {
-              //not a block
-              if (mustProcessCondition) {
+            if (leftNodeTest && leftNodeTest.isPreProcessor) {
+                if (scope.path !== replacement) {
+                  //not a block
                   node ? path.replaceWith(node) : path.remove();
-              }
-              mustProcessCondition = false;
-            } else if (Object.getOwnPropertyNames(scope.bindings).length != 0) {
-              node ? path.replaceWith(node) : path.remove();
-            } else {
-              //no declaration in scope
-              path.replaceWithMultiple(node.body);
+                } else if (Object.getOwnPropertyNames(scope.bindings).length != 0) {
+                    node ? path.replaceWith(node) : path.remove();
+                } else {
+                    //no declaration in scope
+                    path.replaceWithMultiple(node.body);
+                }
             }
-          }
-        }
-      },
-      LogicalExpression: {
-        exit: function exit(path) {
-          var operator = path.node.operator;var left = path.get('left');var right = path.get('right');
-          var leftVal = _evaluate.evaluate.call(left);
-          if (operator == '||' && leftVal.confident) {
-            path.replaceWith(leftVal.value ? left : right);
-          } else if (operator == '&&' && leftVal.confident) {
-            path.replaceWith(leftVal.value ? right : left);
           }
         }
       }
